@@ -1,27 +1,24 @@
 const express = require('express');
-const dotenv = require('dotenv');
-const path = require('path');
-const vacancyRoutes = require('./routes/vacancyRoutes');
-const applicationRoutes = require('./routes/applicationRoutes');
-const { sequelize } = require('./config/db');
-
-// Load environment variables
-dotenv.config();
-
+const cors = require('cors');
 const app = express();
+const userRoutes = require('./routes/userRoutes'); 
+const passwordRoutes = require('./routes/passwordRoutes');
 
-// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cors()); 
 
-// Routes
-app.use('/api/vacancies', vacancyRoutes);
-app.use('/api/applications', applicationRoutes);
+// Use user routes
+app.use('/api', userRoutes);
 
-// Test database connection
-sequelize.authenticate()
-  .then(() => console.log('Database connected...'))
-  .catch(err => console.log('Error: ' + err));
+// Use password reset routes
+app.use('/api', passwordRoutes);
 
-module.exports = app;
+// Error handling middleware
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
